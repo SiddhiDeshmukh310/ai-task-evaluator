@@ -1,65 +1,145 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Lottie from 'lottie-react';
+
+import animation from './lottie/intro-bg.json';
+import FeatureGrid from './components/FeatureGrid';
+import PricingSection from './components/PricingSection';
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+};
+
+export default function HomePage() {
+  const [showIntro, setShowIntro] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowIntro(false), 3500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-50">
+      {/* INTRO SPLASH WITH LOTTIE */}
+      <AnimatePresence>
+        {showIntro && (
+          <motion.div
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            {/* Lottie background */}
+            <Lottie
+              animationData={animation}
+              loop={true}
+              className="absolute inset-0 h-full w-full opacity-40 pointer-events-none"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+            {/* Title on top */}
+            <div className="relative z-10 text-center px-4">
+              <motion.h1
+                className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-emerald-300 via-sky-300 to-cyan-300 bg-clip-text text-transparent"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+              >
+                Smart Task Evaluator
+              </motion.h1>
+              <motion.p
+                className="mt-3 text-sm text-slate-400"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+              >
+                Where the next wave of task evaluation happens.
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MAIN PAGE CONTENT (VISIBLE UNDER SPLASH) */}
+      <div className="mx-auto flex max-w-6xl flex-col gap-16 px-4 py-12">
+        {/* HERO */}
+        <motion.section
+          className="text-center space-y-4"
+          initial="hidden"
+          animate="visible"
+          variants={fadeUp}
+        >
+          <p className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-1 text-[11px] font-medium text-emerald-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            AI Mini-SaaS · Code Review
+          </p>
+
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight">
+            Where the next wave of{' '}
+            <span className="text-emerald-400">task evaluation</span> happens.
+          </h2>
+
+          <p className="max-w-xl mx-auto text-sm text-slate-300">
+            Upload your coding task, run an AI evaluation, and unlock
+            structured feedback with scores, strengths, improvements and
+            refactored code.
+          </p>
+
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <motion.a
+              href="/submit-task"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-6 py-2.5 text-sm font-medium text-slate-950 shadow-lg shadow-emerald-500/20 hover:bg-white"
+            >
+              Start evaluation
+            </motion.a>
+            <motion.a
+              href="/reports"
+              whileHover={{ scale: 1.03, y: -2 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-700 px-6 py-2.5 text-sm text-slate-200 shadow-sm hover:border-emerald-400 hover:text-emerald-200"
+            >
+              View reports
+            </motion.a>
+          </div>
+        </motion.section>
+
+        {/* FEATURES */}
+        <motion.section
+          className="space-y-4 text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
+          <h3 className="text-xl font-semibold">Built for code assignments</h3>
+          <p className="max-w-2xl mx-auto text-sm text-slate-400">
+            Evaluate coding questions, mini projects and take-home tasks in a
+            single place, backed by Supabase and generative AI.
+          </p>
+
+          <FeatureGrid />
+        </motion.section>
+
+        {/* PRICING */}
+        <motion.section
+          className="space-y-4 text-center"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+          variants={fadeUp}
+        >
+          <h3 className="text-xl font-semibold">Subscription plans</h3>
+          <PricingSection />
+        </motion.section>
+      </div>
     </div>
   );
 }
