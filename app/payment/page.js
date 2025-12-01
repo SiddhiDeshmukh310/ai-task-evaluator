@@ -2,7 +2,8 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '../../lib/supabaseClient';
+
 import { motion } from 'framer-motion';
 
 export default function PaymentPage() {
