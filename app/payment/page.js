@@ -1,8 +1,9 @@
 import { Suspense } from 'react';
 import PaymentClient from './PaymentClient';
 
-export default function PaymentPage({ searchParams }) {
-  const reportId = searchParams?.reportId ?? null;
+export default async function PaymentPage({ searchParams }) {
+  const params = await searchParams;
+  const reportId = params?.reportId ?? null;
 
   return (
     <Suspense>
