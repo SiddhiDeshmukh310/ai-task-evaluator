@@ -1,3 +1,5 @@
+import { NextResponse } from 'next/server';
+
 export async function GET() {
-  return { message: "This API response is wrong format" }; // Not using NextResponse, causes error
+  return NextResponse.json({ message: "This API response is correct format" });
 }
