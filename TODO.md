@@ -1,0 +1,6 @@
+- [ ] Fix conditional logic in app/components/BrokenReportCard.js (change = to ===)
+- [ ] Fix conditional logic in app/ai-bug-lab/broken-ui.js (change = to ===)
+- [ ] Add auth check and correct column name in app/api/evaluate/broken-api/route.js
+- [ ] Optimize the loop in app/lib/slowfunction.js
+- [ ] Use NextResponse in app/ai-bug-lab/buggy-api.js
+- [ ] Add return statement in app/components/BrokenButton.js

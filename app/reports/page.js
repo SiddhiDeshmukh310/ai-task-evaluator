@@ -17,7 +17,7 @@ export default function ReportsPage() {
 
       const { data: reportsData } = await supabase
         .from('reports')
-        .select('id, score, created_at, tasks(title)')
+        .select('id, score, created_at, tasks!task_id(title)')
         .eq('user_id', userId);
 
       setReports(reportsData || []);

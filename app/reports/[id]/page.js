@@ -104,6 +104,7 @@ export default function ReportDetailPage() {
           </h1>
           <span className="text-sm text-gray-400">
             Score: {report.score ?? 'N/A'}/100
+            {report.locked && <span className="ml-2 h-2 w-2 rounded-full bg-red-500 inline-block"></span>}
           </span>
         </div>
 
