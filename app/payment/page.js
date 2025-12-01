@@ -2,14 +2,14 @@
 
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-
+import { supabase } from '../../lib/supabaseClient';
 import { motion } from 'framer-motion';
 
 export default function PaymentPage() {
   const searchParams = useSearchParams();
-  const reportId = searchParams.get('reportId');
   const router = useRouter();
+  const reportId = searchParams.get('reportId'); // ✅ define reportId
+
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
