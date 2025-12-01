@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { motion } from 'framer-motion';
 
+// ...rest of your code
+
 export default function PaymentClient({ initialReportId }) {
   const router = useRouter();
 

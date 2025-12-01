@@ -1,12 +1,13 @@
 import { Suspense } from 'react';
 import PaymentClient from './PaymentClient';
 
-export default async function PaymentPage({ searchParams }) {
-  const params = await searchParams;
-  const reportId = params?.reportId ?? null;
+export const dynamic = 'force-dynamic';
+
+export default function PaymentPage({ searchParams }) {
+  const reportId = searchParams?.reportId ?? null;
 
   return (
-    <Suspense>
+    <Suspense fallback={<div>Loading payment...</div>}>
       <PaymentClient initialReportId={reportId} />
     </Suspense>
   );
