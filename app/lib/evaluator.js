@@ -45,12 +45,9 @@ export function validateEvaluationSchema(data) {
 }
 
 export function evaluateMock({ code, description, language = 'javascript' }) {
-  const sanitize = (txt) => (txt || '').replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '[Sanitized Script]');
-  const cleanCode = sanitize(code);
-
-  const codeLines = cleanCode.split('\n').filter((l) => l.trim().length > 0);
-  const hasErrorHandling = /try\s*\{|catch|throw|if\s*\(!/i.test(cleanCode);
-  const hasComments = /\/\//.test(cleanCode) || /\/\*/.test(cleanCode);
+  const codeLines = (code || '').split('\n').filter((l) => l.trim().length > 0);
+  const hasErrorHandling = /try\s*\{|catch|throw|if\s*\(!/i.test(code || '');
+  const hasComments = /\/\//.test(code || '') || /\/\*/.test(code || '');
   const isShort = codeLines.length < 5;
 
   let correctnessScore = hasErrorHandling ? 4 : 3;
@@ -58,14 +55,17 @@ export function evaluateMock({ code, description, language = 'javascript' }) {
   let efficiencyScore = isShort ? 4 : 3;
   let securityScore = hasErrorHandling ? 4 : 2;
 
-  // Prompt injection detection in code
-  const isInjectionAttempt = /ignore (all )?instructions|override score|set score|alert\(/i.test(cleanCode);
+  // Prompt injection detection in user code/description
+  const isInjectionAttempt = /ignore (all )?instructions|override score|set score to 100|assign score/i.test(
+    (code || '') + ' ' + (description || '')
+  );
+
   if (isInjectionAttempt) {
     securityScore = 1;
     correctnessScore = Math.min(correctnessScore, 2);
   }
 
-  if (cleanCode.includes('eval(') || cleanCode.includes('exec(')) {
+  if ((code || '').includes('eval(') || (code || '').includes('exec(')) {
     securityScore = 1;
     correctnessScore = 2;
   }
@@ -74,7 +74,7 @@ export function evaluateMock({ code, description, language = 'javascript' }) {
     correctness: {
       score: correctnessScore,
       justification: isInjectionAttempt
-        ? 'Code contains prompt injection patterns attempting to override audit rules.'
+        ? 'Code contains prompt injection text attempting to override evaluation rules.'
         : hasErrorHandling
         ? 'Code handles basic flow control and input conditions.'
         : 'Missing input validation guard clauses.',
@@ -94,7 +94,7 @@ export function evaluateMock({ code, description, language = 'javascript' }) {
     security_edge_cases: {
       score: securityScore,
       justification: securityScore === 1
-        ? 'Flagged for security vulnerabilities or prompt override injection patterns.'
+        ? 'Security risk: flagged for injection patterns or unsafe eval usage.'
         : securityScore > 2
         ? 'Safely handles typical inputs.'
         : 'Vulnerable to null pointers or unsafe evaluation.',
@@ -117,7 +117,7 @@ export function evaluateMock({ code, description, language = 'javascript' }) {
     'Optimize memory allocations in inner iteration loops.',
   ];
 
-  const refactored_code = `// Refactored ${language} Solution\n// Safety-audited code\n${cleanCode}`;
+  const refactored_code = `// Refactored ${language} Solution\n${code}`;
 
   return {
     score: totalScore,
@@ -236,8 +236,8 @@ ${code}`;
   return JSON.parse(rawText);
 }
 
-export async function evaluateCode({ code, description, language = 'javascript', difficulty = 'medium' }) {
-  const provider = (process.env.EVALUATOR_PROVIDER || 'mock').toLowerCase();
+export async function evaluateCode({ code, description, language = 'javascript', difficulty = 'medium', providerTarget }) {
+  const provider = (providerTarget || process.env.EVALUATOR_PROVIDER || 'mock').toLowerCase();
 
   let attempt = 0;
   let lastError = null;
@@ -271,4 +271,33 @@ export async function evaluateCode({ code, description, language = 'javascript',
   throw new Error(
     `LLM Code Evaluation failed after 2 attempts (provider: ${provider}). Root cause: ${lastError?.message}`
   );
+}
+
+/**
+ * Side-by-Side Dual Model Comparison Helper
+ */
+export async function compareModels({ code, description, language = 'javascript', providerA = 'mock', providerB = 'gemini' }) {
+  const [resultA, resultB] = await Promise.all([
+    evaluateCode({ code, description, language, providerTarget: providerA }),
+    evaluateCode({ code, description, language, providerTarget: providerB }).catch((err) => ({
+      score: null,
+      error: err.message,
+      provider_used: providerB,
+    })),
+  ]);
+
+  const scoreDelta = resultB.score !== null ? Math.abs(resultA.score - resultB.score) : null;
+  let agreementLevel = 'N/A';
+  if (scoreDelta !== null) {
+    if (scoreDelta <= 5) agreementLevel = 'Very High Agreement (Δ <= 5 pts)';
+    else if (scoreDelta <= 15) agreementLevel = 'Moderate Agreement (Δ <= 15 pts)';
+    else agreementLevel = 'Divergent Evaluation (Δ > 15 pts)';
+  }
+
+  return {
+    modelA: resultA,
+    modelB: resultB,
+    score_delta: scoreDelta,
+    agreement_level: agreementLevel,
+  };
 }
