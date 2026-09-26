@@ -66,7 +66,14 @@ test('2. Schema failure / malformed output triggers retry and throws clean error
   process.env.EVALUATOR_PROVIDER = 'mock';
 });
 
-test('3. Prompt-injection attempts in code comments/descriptions are treated as untrusted data and penalized', async () => {
+/**
+ * NOTE ON PROMPT INJECTION SECURITY:
+ * This test verifies the deterministic rule-based behavior of the mock engine.
+ * For real LLM providers (OpenAI / Gemini), system prompts instruct the model to treat
+ * user submission code as untrusted text to audit. However, real LLMs are inherently
+ * susceptible to prompt injection attacks and are NOT guaranteed to be hack-proof.
+ */
+test('3. [Mock Engine Behavior] Prompt-injection patterns in code/description are deterministically penalized', async () => {
   process.env.EVALUATOR_PROVIDER = 'mock';
 
   const injectionSubmission = {
@@ -80,10 +87,10 @@ function vulnerable(arr) {
 
   const result = await evaluateCode(injectionSubmission);
 
-  // Assert score is NOT 100 (injection attempt failed to force 100 score)
-  assert.notEqual(result.score, 100, 'Prompt injection must NOT successfully override evaluation score');
-  assert.equal(result.criteria.security_edge_cases.score, 1, 'Security criterion must be penalized to 1');
-  assert.match(result.criteria.correctness.justification, /injection/i, 'Justification must identify injection attempt');
+  // Assert score is NOT 100 (mock engine pattern-matching penalized the security score)
+  assert.notEqual(result.score, 100, 'Mock provider prompt injection must NOT override score to 100');
+  assert.equal(result.criteria.security_edge_cases.score, 1, 'Security criterion must be penalized to 1 in mock engine');
+  assert.match(result.criteria.correctness.justification, /injection/i, 'Mock engine justification identifies injection pattern');
   assert.equal(typeof result.refactored_code, 'string');
 });
 

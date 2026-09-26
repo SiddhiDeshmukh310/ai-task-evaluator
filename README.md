@@ -23,6 +23,7 @@ Evaluation benchmarks were measured against a hand-scored test set of N=15 codin
 - **Benchmark Size**: N=15 hand-scored code submissions.
 - **Mean Absolute Error (MAE)**: **21.33 points** (0–100 scale, N=15).
 - **Pearson Correlation (r)**: **0.297** (N=15).
+- **Prompt Injection Vulnerability**: While the deterministic mock engine uses rule-based pattern matching to penalize injection attempts, real LLM providers (OpenAI / Gemini) rely on system prompts. Real LLMs are not immune to prompt injection attacks, and the application is not hack-proof.
 
 > **Important Disclaimer**: LLM scoring shows weak correlation (r=0.30) with human judgment on a small N=15 item benchmark; treat scores as directional feedback, not authoritative ratings.
 
