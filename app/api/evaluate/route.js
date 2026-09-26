@@ -1,40 +1,32 @@
 import { NextResponse } from 'next/server';
+import { evaluateCode } from '../../lib/evaluator';
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { description, code } = body;
+    const { description, code, language, difficulty } = body;
 
     if (!description || !code) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
-
+      return NextResponse.json(
+        { error: 'Missing required fields: description and code are required.' },
+        { status: 400 }
+      );
     }
-    
-    // 🔮 Fake "AI" evaluation for demo
-    const score = 78; // arbitrary score
-    const strengths = [
-      'Code is syntactically valid JavaScript.',
-      'Logic is mostly clear and readable.',
-      'Uses basic constructs in an understandable way.',
-    ];
-    const improvements = [
-      'Add error handling for invalid inputs.',
-      'Cover more edge cases (empty arrays, null, etc.).',
-      'Improve variable naming and add comments.',
-    ];
-    const refactored_code = `// Example refactored version\n${code}`;
 
-    return NextResponse.json({
-      score,
-      strengths,
-      improvements,
-      refactored_code,
+    // Run AI Evaluation with schema validation & 1 retry attempt
+    const evalResult = await evaluateCode({
+      description,
+      code,
+      language: language || 'javascript',
+      difficulty: difficulty || 'medium',
     });
+
+    return NextResponse.json(evalResult, { status: 200 });
   } catch (e) {
-    console.error(e);
+    console.error('[API Evaluate Error]', e);
     const msg = e instanceof Error ? e.message : String(e);
     return NextResponse.json(
-      { error: 'Internal error in /api/evaluate', details: msg },
+      { error: 'Evaluation failed', details: msg },
       { status: 500 }
     );
   }
