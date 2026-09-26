@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
-import { evaluateCode } from '../../lib/evaluator';
+import { compareModels } from '../../../lib/evaluator';
 
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { description, code, language, difficulty } = body;
+    const { description, code, language, providerA, providerB } = body;
 
     if (!description || !code) {
       return NextResponse.json(
@@ -13,20 +13,20 @@ export async function POST(req) {
       );
     }
 
-    // Run AI Evaluation with schema validation & 1 retry attempt
-    const evalResult = await evaluateCode({
+    const comparison = await compareModels({
       description,
       code,
       language: language || 'javascript',
-      difficulty: difficulty || 'medium',
+      providerA: providerA || 'mock',
+      providerB: providerB || 'gemini',
     });
 
-    return NextResponse.json(evalResult, { status: 200 });
+    return NextResponse.json(comparison, { status: 200 });
   } catch (e) {
-    console.error('[API Evaluate Error]', e);
+    console.error('[API Compare Error]', e);
     const msg = e instanceof Error ? e.message : String(e);
     return NextResponse.json(
-      { error: 'Evaluation failed', details: msg },
+      { error: 'Side-by-side comparison failed', details: msg },
       { status: 500 }
     );
   }
